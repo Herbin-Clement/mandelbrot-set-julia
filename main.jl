@@ -1,7 +1,7 @@
-@time using Images
+# @time using Images
 # @time using VideoIO
 
-function color(z::ComplexF64, c::ComplexF64, limit::Float64, depth::Int)::UInt8
+function color(z::ComplexF64, c::ComplexF64, limit::Float64, depth::Int)::Array{UInt8, 1}
     count = 0
     for _ in 1:depth
         z = z * z + c
@@ -10,14 +10,14 @@ function color(z::ComplexF64, c::ComplexF64, limit::Float64, depth::Int)::UInt8
         end
         count += 1
     end
-    return trunc(UInt8, 255 * count / depth)
+    return [trunc(UInt8, 255 * count / depth), trunc(UInt8, 255 * count / depth), trunc(UInt8, 255 * count / depth)]
 end
 
 function norm(c::ComplexF64)::Float64
     return sqrt(real(c) * real(c) + imag(c) * imag(c))
 end
 
-function mandelbrot(c::ComplexF64, xmin::Float64, xmax::Float64, ymin::Float64, ymax::Float64, w::Int64, h::Int64, depth::Int64, limit::Float64)::Array{UInt8, 2}
+function mandelbrot(c::ComplexF64, xmin::Float64, xmax::Float64, ymin::Float64, ymax::Float64, w::Int64, h::Int64, depth::Int64, limit::Float64)::Array{UInt8, 3}
     xshift = (xmax - xmin) / (w - 1)
     yshift = (ymax - ymin) / (h - 1)
     img = Array{UInt8,2}(undef, h, w)
@@ -46,8 +46,8 @@ function main()
     xmax = 2.0
     ymin = -2.0
     ymax = 2.0
-    w = 25000
-    h = 25000
+    w = 2500
+    h = 2500
     depth = 100
     limit = 5000.0
     i = 0.75
@@ -62,7 +62,10 @@ function main()
     #         end
     #     end
     # end
-    save("img/c.png", img)
+    # save("img/c.png", img)
+    # save("rgb.png", colorview(RGB, rand(3,256,256)))
+    println(typeof(rand(3, 256, 256)))
+    println(typeof(img))
 end
 
 main()
