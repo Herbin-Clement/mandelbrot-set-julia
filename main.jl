@@ -52,40 +52,6 @@ function getNumberOfImage(space::Float64, scale::Float64, limit::Float64)::Int
     return count
 end
 
-function main()
-    println("Number of thread: $(Threads.nthreads())")
-    dir = "/img"
-    # if Base.Filesystem.ispath("img")
-    #     Base.Filesystem.rm("img", recursive=true)
-    # end
-    # w = 2500
-    # h = 2500
-    # depth = 1000
-    # limit = 5.0
-    # num_img = 1
-    # x_center = - 0.75
-    # y_center = 0.1
-    # space = 2.0
-    # lims = 0.0001
-    # scale = 0.95
-    # nb_img = getNumberOfImage(space, scale, lims)
-    # imgs = Array{Array{UInt8, 2}, 1}(undef, nb_img)
-    # while space > lims
-    #     space = scale * space
-    #     xmin = - space + x_center
-    #     xmax = space + x_center
-    #     ymin = - space + y_center
-    #     ymax = space + y_center
-    #     xlims = xmax - xmin
-    #     depth = trunc(Int, 50 + log10(((4 / abs(xlims)))) ^ 5)
-    #     print("iter: $depth ")
-    #     @time imgs[num_img] = mandelbrot(xmin, xmax, ymin, ymax, w, h, depth, limit)
-    #     save("img/$num_img.png", imgs[num_img])
-    #     num_img += 1
-    # end
-    processVideo(string(pwd(), dir))
-end
-
 function processVideo(dir::String)
     # imgnames = filter(x->occursin(".png",x), readdir(dir)) # Populate list of all .pngs
     # intstrings =  map(x->split(x,".")[1],imgnames) # Extract index from filenames
@@ -112,6 +78,43 @@ function processVideo(dir::String)
             write(writer, img)
         end
     end
+end
+
+function processImage(dir::String, w::Int, h::Int, zlimit::Float64, x_center::Float64, y_center::Float64, limit::Float64, scale::Float64, space::Float64)
+    num_img = 1
+    nb_img = getNumberOfImage(space, scale, limit)
+    imgs = Array{Array{UInt8, 2}, 1}(undef, nb_img)
+    while space > limit
+        space = scale * space
+        xmin = - space + x_center
+        xmax = space + x_center
+        ymin = - space + y_center
+        ymax = space + y_center
+        xlims = xmax - xmin
+        depth = trunc(Int, 50 + log10(((4 / abs(xlims)))) ^ 5)
+        print("iter: $depth ")
+        @time imgs[num_img] = mandelbrot(xmin, xmax, ymin, ymax, w, h, depth, zlimit)
+        save("$dir/$num_img.png", imgs[num_img])
+        num_img += 1
+    end
+end
+
+function main()
+    println("Number of thread: $(Threads.nthreads())")
+    dir = "img2"
+    if Base.Filesystem.ispath("img2")
+        Base.Filesystem.rm("img2", recursive=true)
+    end
+    w = 800
+    h = 800
+    zlimit = 5.0
+    x_center = - 0.75
+    y_center = 0.1
+    space = 2.0
+    limit = 0.0001
+    scale = 0.95
+    processImage(dir, w, h, zlimit, x_center, y_center, limit, scale, space)
+    # processVideo(string(pwd(), "/", dir))
 end
 
 main()
